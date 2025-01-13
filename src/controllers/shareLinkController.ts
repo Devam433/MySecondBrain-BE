@@ -11,19 +11,34 @@ export const createOrDeleteLink = async(req:Request,res:Response):Promise<void> 
     const hash = generateHash(30)
 
     if(share) {
-      const Link = new LinkModel({hash,userId:user?.id})
-      const response = await Link.save();
-      res.status(200).json({success:true,message:'Share link created',Link:response})
+
+      // const existingLink = await LinkModel.findOne({userId:user?.id})
+      // if(existingLink) {
+      //   res.status(200).json({success:true,message:'Share Link already exists',Link:{link:existingLink.hash}})
+      //   return;
+      // }
+
+      // const Link = new LinkModel({hash,userId:user?.id})
+      // const response = await Link.save();
+
+      const response = await LinkModel.findOneAndUpdate({userId:user?.id},{hash,userId:user?.id},{upsert:true,new:true})
+      res.status(200).json({success:true,message:'Share link created',Link:{link:response.hash}})
       return;
     } else {
 
-      const existingLink = await LinkModel.findOne({userId:user?.id})
+      // const existingLink = await LinkModel.findOne({userId:user?.id})
+      // if(!existingLink) {
+      //   res.status(404).json({success:false,message:'Previous Link document not found.'})
+      //   return;
+      // }
+
+      // await LinkModel.deleteOne({userId:user?.id});
+
+      const existingLink = await LinkModel.findOneAndDelete({userId:user?.id});
       if(!existingLink) {
         res.status(404).json({success:false,message:'Previous Link document not found.'})
         return;
       }
-
-      await LinkModel.deleteOne({userId:user?.id});
       res.status(200).json({success:true,message:'Link removed successfully.'})
     }
   } catch (error) {
@@ -38,13 +53,12 @@ export const getShareLink = async(req:Request, res:Response):Promise<void> => {
     const hash = param.replace(':','')
 
     const Link = await LinkModel.findOne({hash})
-    const contents = await ContentModel.find({createdBy:Link?.userId})
-
-    if(contents.length<1) {
-      res.status(404).json({success:false,message:'Shared Brain not found',contents})
+    if(!Link) {
+      res.status(404).json({success:false,message:'Shared Brain not found!'})
       return;
     }
-    
+
+    const contents = await ContentModel.find({createdBy:Link.userId})
     res.status(200).json({success:true,contents})
     return;
   } catch (error) {
