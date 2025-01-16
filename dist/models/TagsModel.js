@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsModel = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const TagsSchema = new mongoose_1.default.Schema({
-    title: String,
+    title: {
+        type: String,
+        unique: true,
+    }
 });
 exports.TagsModel = mongoose_1.default.model('Tags', TagsSchema);

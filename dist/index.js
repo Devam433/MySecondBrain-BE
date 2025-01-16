@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const authRoute_1 = __importDefault(require("./routes/authRoute"));
 const contentRoute_1 = __importDefault(require("./routes/contentRoute"));
 const shareLinkRoute_1 = __importDefault(require("./routes/shareLinkRoute"));
+const searchTagsRoute_1 = __importDefault(require("./routes/searchTagsRoute"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
@@ -15,6 +16,7 @@ app.use(express_1.default.json());
 app.use('/api/v1/auth', authRoute_1.default);
 app.use('/api/v1/content', contentRoute_1.default);
 app.use('/api/v1/share', shareLinkRoute_1.default);
+app.use('/api/v1', searchTagsRoute_1.default);
 if (!process.env.connection_string) {
     throw new Error('Environment variable connection_string is not set');
 }

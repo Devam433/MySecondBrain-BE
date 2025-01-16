@@ -1,11 +1,12 @@
 //@ts-ignore
 import { Request, Response } from "express";
 import { ContentModel } from "../models/ContentsModel"
+import { addNewContentService } from "../services/addNewContent";
 
 export const getAllContents = async (req:Request,res:Response) => {
   const user = req.user; //{userName,id}
   try {
-    const allContent = await ContentModel.find({createdBy:user?.id});
+    const allContent = await ContentModel.find({createdBy:user?.id}).populate('tags','-_id title');
     if(!allContent) {
       res.status(404).json({success:false,message:'Contents not found. Ensure user/userid is valid!'});
     }
@@ -20,8 +21,7 @@ export const addContent = async (req:Request,res:Response) => {
   const contentToAdd = req.body;
   const user = req.user;
   try {
-    const content = new ContentModel({...contentToAdd,createdBy:user?.id});
-    const response = await content.save();
+    const response = await addNewContentService(contentToAdd,user)
     res.status(200).json({success:true,message:'Content created successfully!',content:response})
   } catch (error) {
     console.log('Error at addContent!',error);

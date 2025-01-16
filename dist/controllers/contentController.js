@@ -11,10 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteContent = exports.addContent = exports.getAllContents = void 0;
 const ContentsModel_1 = require("../models/ContentsModel");
+const addNewContent_1 = require("../services/addNewContent");
 const getAllContents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.user; //{userName,id}
     try {
-        const allContent = yield ContentsModel_1.ContentModel.find({ createdBy: user === null || user === void 0 ? void 0 : user.id });
+        const allContent = yield ContentsModel_1.ContentModel.find({ createdBy: user === null || user === void 0 ? void 0 : user.id }).populate('tags', '-_id title');
         if (!allContent) {
             res.status(404).json({ success: false, message: 'Contents not found. Ensure user/userid is valid!' });
         }
@@ -30,8 +31,7 @@ const addContent = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const contentToAdd = req.body;
     const user = req.user;
     try {
-        const content = new ContentsModel_1.ContentModel(Object.assign(Object.assign({}, contentToAdd), { createdBy: user === null || user === void 0 ? void 0 : user.id }));
-        const response = yield content.save();
+        const response = yield (0, addNewContent_1.addNewContentService)(contentToAdd, user);
         res.status(200).json({ success: true, message: 'Content created successfully!', content: response });
     }
     catch (error) {
