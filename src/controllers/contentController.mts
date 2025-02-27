@@ -1,7 +1,9 @@
 //@ts-ignore
 import { Request, Response } from "express";
-import { ContentModel } from "../models/ContentsModel"
-import { addNewContentService } from "../services/addNewContent";
+import { ContentModel } from "../models/ContentsModel.js"
+import { addNewContentService } from "../services/addNewContent.js";
+import { generateVectorEmbedding } from "../services/vectorEmbedder.mjs";
+import { getChromaDbCollection } from "../config/chromadb.js";
 
 export const getAllContents = async (req:Request,res:Response) => {
   const user = req.user; //{userName,id}
@@ -21,7 +23,26 @@ export const addContent = async (req:Request,res:Response) => {
   const contentToAdd = req.body;
   const user = req.user;
   try {
+    if(!contentToAdd) {
+      return res.status(400).json({messgae:'Content is required!'})
+    }
+    
+    //generate vector embeddtion of the content
+    const vectorEmbeddings = await generateVectorEmbedding(contentToAdd); 
+    console.log('embeddings tolist or flat', vectorEmbeddings);
+
+    //get the ChromaDb collection
+    const chromaDbCollection = await getChromaDbCollection();
+
+    //add the content in mongodb
     const response = await addNewContentService(contentToAdd,user)
+
+    //add the vector embeddings of the content in the chromaDb collection
+    await chromaDbCollection.add({
+      ids: [response._id.toString()],
+      embeddings: [vectorEmbeddings],
+    })
+
     res.status(200).json({success:true,message:'Content created successfully!',content:response})
   } catch (error) {
     console.log('Error at addContent!',error);

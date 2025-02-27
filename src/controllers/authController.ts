@@ -40,6 +40,7 @@ export const signUp = async (req:any,res:any):Promise<void> => {
     const userExists = await UsersModel.findOne({userName:userDetails.userName});
     if(userExists) {
       res.status(401).json({success:true,message:'Conflict, userName not available.'});
+      return;
     }
 
     const user = new UsersModel(userDetails);

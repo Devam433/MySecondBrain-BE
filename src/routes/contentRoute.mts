@@ -1,6 +1,6 @@
 import express from "express";
-import { addContent, deleteContent, getAllContents } from "../controllers/contentController";
-import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
+import { addContent, deleteContent, getAllContents } from "../controllers/contentController.mjs";
+import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware.js";
 
 const router = express.Router()
 
