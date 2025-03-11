@@ -20,6 +20,7 @@ export const getAllContents = async (req:Request,res:Response) => {
 }
 
 export const addContent = async (req:Request,res:Response) => {
+  console.log('Inside addContent')
   const contentToAdd = req.body;
   const user = req.user;
   try {
@@ -27,22 +28,42 @@ export const addContent = async (req:Request,res:Response) => {
       return res.status(400).json({messgae:'Content is required!'})
     }
     
+    // if(!contentToAdd.content) {
+    //   return res.status(400).json({message:'Content text is required!'})
+    // }
+
     //generate vector embeddtion of the content
     const vectorEmbeddings = await generateVectorEmbedding(contentToAdd); 
-    console.log('embeddings tolist or flat', vectorEmbeddings);
+    
+    // Convert tensor to flat array if needed
+    // const flatEmbeddings = Array.isArray(vectorEmbeddings.data) 
+    //   ? vectorEmbeddings.data 
+    //   : Array.from(vectorEmbeddings.data);
 
     //get the ChromaDb collection
     const chromaDbCollection = await getChromaDbCollection();
-
+    
     //add the content in mongodb
     const response = await addNewContentService(contentToAdd,user)
-
-    //add the vector embeddings of the content in the chromaDb collection
-    await chromaDbCollection.add({
+    
+    // Debug log before sending to ChromaDB
+    const dataToSend = {
       ids: [response._id.toString()],
-      embeddings: [vectorEmbeddings],
-    })
+      embeddings: vectorEmbeddings, // Single array of numbers
+      documents: [contentToAdd.title],
+      metadatas: contentToAdd.newTags,
+    };
+    
+    console.log('Data being sent to ChromaDB:', {
+      ...dataToSend,
+    });
+    console.log( ` embeddings Length: ${dataToSend.embeddings[0].length}`); // Log length instead of full array)
+    console.log( ` embeddings Length: ${dataToSend.embeddings.length}`);
+    //add the vector embeddings of the content in the chromaDb collection
+    const chromaCollection = await chromaDbCollection.add(dataToSend);
 
+    const docs = await chromaDbCollection.get();
+    console.log('All docs:', docs);
     res.status(200).json({success:true,message:'Content created successfully!',content:response})
   } catch (error) {
     console.log('Error at addContent!',error);

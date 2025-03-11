@@ -12,11 +12,11 @@ const app: Application = express();
 
 app.use(express.json())
 
-app.use('/api/v1/auth',authRouter)
-app.use('/api/v1/content',contentRouter)
-app.use('/api/v1/share',shareLinkRouter)
-app.use('/api/v1',searchTagsRoute)
-app.use('/api/v1',searchRoute)
+app.use('/api/v1/auth', authRouter.default)
+app.use('/api/v1/content', contentRouter)
+app.use('/api/v1/share', shareLinkRouter.default)
+app.use('/api/v1', searchTagsRoute.default)
+app.use('/api/v1', searchRoute)
 
 
 async function main() {

@@ -6,13 +6,19 @@ export const searchQueryInChromaDb = async (query) => {
     try {
         const queryVector = await generateVectorEmbedding(query);
         console.log('queryVector', queryVector);
+        console.log('queryVector dimension', queryVector[0].length);
         const collection = await getChromaDbCollection();
-        const result = await collection.query({
-            queryEmbeddings: [queryVector],
-            nResults: 3,
+        collection?.get().then(res => {
+            console.log('ChromaDbCollection docs', res);
         });
+        const result = await collection.query({
+            queryEmbeddings: queryVector,
+            nResults: 2,
+        });
+        console.log('result', result);
         return result;
     }
     catch (error) {
+        console.log('Error at searchQueryInChromaDb service', error);
     }
 };

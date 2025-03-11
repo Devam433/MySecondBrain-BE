@@ -13,15 +13,17 @@ router.post('/search-similar-content', async (req:Request,res:Response)=>{
       res.status(400).json({messgae:'Query is required!'});
     }
 
+    console.log('query ',query)
+
     //get similar top 3 vector embedding documents from chromaDb
     const result = await searchQueryInChromaDb(query);
 
     console.log('Result of searchQueryInChromaDb',result);
 
     const documentIds = result?.ids.flat()
-
+    console.log('documentIds',documentIds)  //["id"]
     //get the contents from mongodb
-    const content = await ContentModel.find({_id: { $in: {documentIds} }})
+    const content = await ContentModel.find({_id: { $in: documentIds }})
 
     //from the FE this content has to be passed to the LLM along with the prompt.
     res.json(content);

@@ -6,3 +6,8 @@ node_modules/
 
 # TypeScript cache
 *.tsbuildinfo
+
+
+src/deleteCollection.mts
+
+dist/deleteCollection.mjs
